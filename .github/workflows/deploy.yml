@@ -32,24 +32,21 @@ jobs:
           push: true
           tags: sresthjay/my-python-app:latest
 
-      # 5. Update the EC2 Server (CLI)
+# 5. Update the EC2 Server (AWS CLI)
 - name: Configure AWS Credentials
   uses: aws-actions/configure-aws-credentials@v4
   with:
     aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
     aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-    aws-region: us-east-1 # Check your instance region in AWS Console (e.g., us-east-1, ap-south-1)
+    aws-region: us-east-1
 
 - name: Update Container
   env:
     CONTAINER_NAME: my-cloud-app
     IMAGE_NAME: sresthjay/my-python-app:latest
-    PUBLIC_IP: ${{ secrets.EC2_HOST }} # Your public IP
+    PUBLIC_IP: ${{ secrets.EC2_HOST }}
   run: |
-    # Stop old container
     sudo docker stop $CONTAINER_NAME || true
     sudo docker rm $CONTAINER_NAME || true
-    # Pull new image
     sudo docker pull $IMAGE_NAME
-    # Run new container on the new IP
     sudo docker run -d --name $CONTAINER_NAME -p 8080:8080 $IMAGE_NAME
