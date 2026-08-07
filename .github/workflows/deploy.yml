@@ -33,15 +33,7 @@ jobs:
           push: true
           tags: sresthjay/my-python-app:latest
 
-      # 5. Configure AWS Credentials
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
-
-      # 6. Update the EC2 Server
+      # 5. Update the EC2 Server
       - name: Update Container
         env:
           CONTAINER_NAME: my-cloud-app
