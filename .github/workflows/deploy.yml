@@ -2,51 +2,56 @@ name: Deploy to AWS EC2
 
 on:
   push:
-    branches: [ "main" ] # Trigger this when code is pushed to 'main'
+    branches:
+      - main
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest # Run this job on a fresh Linux runner
+    runs-on: ubuntu-latest
 
     steps:
       # 1. Checkout your code
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       # 2. Set up Docker
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v4
 
       # 3. Login to Docker Hub
       - name: Login to Docker Hub
-        uses: docker/login-action@v2
+        uses: docker/login-action@v4
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       # 4. Build and Push the Image
       - name: Build and Push
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: .
           push: true
           tags: sresthjay/my-python-app:latest
 
-# 5. Update the EC2 Server (AWS CLI)
-- name: Configure AWS Credentials
-  uses: aws-actions/configure-aws-credentials@v4
-  with:
-    aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-    aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-    aws-region: us-east-1
+      # 5. Configure AWS Credentials
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
 
-- name: Update Container
-  env:
-    CONTAINER_NAME: my-cloud-app
-    IMAGE_NAME: sresthjay/my-python-app:latest
-    PUBLIC_IP: ${{ secrets.EC2_HOST }}
-  run: |
-    sudo docker stop $CONTAINER_NAME || true
-    sudo docker rm $CONTAINER_NAME || true
-    sudo docker pull $IMAGE_NAME
-    sudo docker run -d --name $CONTAINER_NAME -p 8080:8080 $IMAGE_NAME
+      # 6. Update the EC2 Server
+      - name: Update Container
+        env:
+          CONTAINER_NAME: my-cloud-app
+          IMAGE_NAME: sresthjay/my-python-app:latest
+          PUBLIC_IP: ${{ secrets.EC2_HOST }}
+
+        run: |
+          ssh -o StrictHostKeyChecking=no ubuntu@$PUBLIC_IP "
+            sudo docker stop $CONTAINER_NAME || true
+            sudo docker rm $CONTAINER_NAME || true
+            sudo docker pull $IMAGE_NAME
+            sudo docker run -d --name $CONTAINER_NAME -p 8080:8080 $IMAGE_NAME
+          "
