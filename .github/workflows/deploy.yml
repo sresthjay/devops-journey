@@ -60,14 +60,22 @@ jobs:
           -o StrictHostKeyChecking=no \
           ubuntu@$EC2_HOST << EOF
 
+          echo "Stopping existing container..."
           sudo docker stop $CONTAINER_NAME || true
+
+          echo "Removing existing container..."
           sudo docker rm $CONTAINER_NAME || true
 
+          echo "Pulling latest Docker image..."
           sudo docker pull $IMAGE_NAME
 
+          echo "Starting new container..."
           sudo docker run -d \
             --name $CONTAINER_NAME \
             -p 8080:8080 \
             $IMAGE_NAME
+
+          echo "Current running containers:"
+          sudo docker ps
 
           EOF
