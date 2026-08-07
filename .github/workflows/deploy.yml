@@ -25,12 +25,13 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # 4. Build and Push Docker image
+      # 4. Build and Push Docker Image (No Cache)
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v6
         with:
           context: .
           push: true
+          no-cache: true
           tags: sresthjay/my-python-app:latest
 
       # 5. Configure AWS Credentials
@@ -48,7 +49,7 @@ jobs:
           echo "${{ secrets.EC2_KEY }}" > ~/.ssh/my-devops-key.pem
           chmod 600 ~/.ssh/my-devops-key.pem
 
-      # 7. Deploy container on EC2
+      # 7. Deploy Docker Container on EC2
       - name: Deploy Docker Container on EC2
         env:
           EC2_HOST: ${{ secrets.EC2_HOST }}
@@ -60,22 +61,20 @@ jobs:
           -o StrictHostKeyChecking=no \
           ubuntu@$EC2_HOST << EOF
 
-          echo "Stopping existing container..."
-          sudo docker stop $CONTAINER_NAME || true
-
-          echo "Removing existing container..."
-          sudo docker rm $CONTAINER_NAME || true
-
-          echo "Pulling latest Docker image..."
+          echo "Pulling latest image..."
           sudo docker pull $IMAGE_NAME
+
+          echo "Stopping old container..."
+          sudo docker rm -f $CONTAINER_NAME || true
 
           echo "Starting new container..."
           sudo docker run -d \
             --name $CONTAINER_NAME \
+            --restart always \
             -p 8080:8080 \
             $IMAGE_NAME
 
-          echo "Current running containers:"
+          echo "Deployment complete"
           sudo docker ps
 
           EOF
