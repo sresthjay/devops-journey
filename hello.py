@@ -13,9 +13,9 @@ class MyHandler(http.server.SimpleHTTPRequestHandler):
         
         html_content = f"""
         <html>
-        <head><title>Hi✌️, Hello, DevOps World!</title></head>
+        <head><title>ello, DevOps World!</title></head>
         <body>
-            <h1>🎉 Hello, Automated DevOps World!</h1>
+            <h1>Hello, Automated DevOps World!</h1>
             <p><strong>Current Time:</strong> {datetime.datetime.now()}</p>
             <p><strong>Server Hostname:</strong> {os.uname().nodename}</p>
             <p><strong>Python is ready for automation.</strong></p>
