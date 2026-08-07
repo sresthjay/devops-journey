@@ -1,0 +1,9 @@
+services:
+  app:
+    image: sresthjay/my-python-app:latest
+    container_name: my-cloud-app
+    ports:
+      - "8000:80" # Maps host port 8000 to container port 80
+    restart: unless-stopped
+    environment:
+      - ENV=production
