@@ -4,7 +4,7 @@
 # Replace 'your-region' with your actual region (e.g., us-east-1)
 provider "aws" {
   region = "us-east-1" # UPDATE THIS!
-  
+
   # Note: We will use environment variables for credentials (see next step)
   # Alternatively, you can use profiles, but env vars are easier for now.
 }
@@ -25,7 +25,7 @@ resource "aws_security_group" "web_sg" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"] # Allow SSH (for learning/testing)
+    cidr_blocks = ["27.60.50.159/32"] # Allow SSH (for learning/testing)
   }
 
   egress {
@@ -45,8 +45,8 @@ resource "aws_instance" "web_server" {
   ami                    = "ami-0009f0e33a034b86c" # Ubuntu 24.04 AMI ID (Update for your region!)
   instance_type          = "t4g.micro"
   vpc_security_group_ids = [aws_security_group.web_sg.id]
-  
-  key_name = "my-devops-key" 
+
+  key_name = "my-devops-key"
 
   user_data = <<-EOF
               #!/bin/bash
@@ -61,8 +61,14 @@ resource "aws_instance" "web_server" {
               
               # Pull your Docker image and run it
               docker pull sresthjay/my-python-app:latest
-              docker run -d --name my-cloud-app -p 8080:8080 sresthjay/my-python-app
-              EOF
+              docker run -d \
+                --name my-cloud-app \
+                --restart unless-stopped \
+                -p 8080:8080 \
+                sresthjay/my-python-app:latest
+             
+
+             EOF
 
   tags = {
     Name = "terraform-ec2-web"
@@ -71,6 +77,6 @@ resource "aws_instance" "web_server" {
 
 # 4. Output the Public IP
 output "instance_public_ip" {
-  value = aws_instance.web_server.public_ip
+  value       = aws_instance.web_server.public_ip
   description = "The public IP address of your EC2 instance"
 }

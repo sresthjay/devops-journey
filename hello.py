@@ -13,7 +13,7 @@ class MyHandler(http.server.SimpleHTTPRequestHandler):
         
         html_content = f"""
         <html>
-        <head><title>ello, DevOps World!</title></head>
+        <head><title>Hello, DevOps World!</title></head>
         <body>
             <h1>Hello, Automated DevOps World!</h1>
             <p><strong>Current Time:</strong> {datetime.datetime.now()}</p>
